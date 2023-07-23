@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Website Scraping Check</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="mb-4">Website Scraping Check</h1>
+                <form id="scrapeForm" class="mb-4">
+                    <div class="form-group">
+                        <label for="website_url">Enter the URL to check:</label>
+                        <input type="text" class="form-control" name="website_url" id="website_url" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Check</button>
+                </form>
+                <div id="result" style="display: none;">
+                    <div class="alert" role="alert" id="loadingSpinner">
+                        Checking...
+                        <div class="spinner-border ml-2" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="successAlert" class="alert alert-success" style="display: none;"></div>
+                    <div id="errorAlert" class="alert alert-danger" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('scrapeForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const url = document.getElementById('website_url').value;
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('successAlert').style.display = 'none';
+            document.getElementById('errorAlert').style.display = 'none';
+
+            fetch('/scrape', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                if (data.result) {
+                    document.getElementById('successAlert').innerHTML = `The website is scrapable. Title: ${data.message}`;
+                    document.getElementById('successAlert').style.display = 'block';
+                } else {
+                    document.getElementById('errorAlert').innerHTML = `The website is not scrapable. Message: ${data.message}`;
+                    document.getElementById('errorAlert').style.display = 'block';
+                }
+                document.getElementById('result').style.display = 'block';
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('errorAlert').innerHTML = `Error: ${error.message}`;
+                document.getElementById('errorAlert').style.display = 'block';
+                document.getElementById('result').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
